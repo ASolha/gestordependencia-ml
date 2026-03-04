@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Gestor de Pendências ML",
+  "version": "1.0.1",
+  "description": "Organiza pendências de pedidos no Mercado Livre",
+  "permissions": ["storage", "identity"],
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1wsFLTSfCH2HluwXUoay/AHUtbLSf1qOV6obAgzm3sc+PMHTEcffgIRJmTrR79xTDGgkrsd5UBEvxBh0cAH2wButSqWfcAWmY0I6oMc+O9zHv87fYIpC+HVNiO9OL1kgEr79cCSZ84AWszELwwjYMlBULTQvZRAUY5EyYTfmGzwbGsy9QrqOY3vXSD4PQPEUum+PpVzrPrr0v+j4580LoBFbWhLd8l3ejCovGJAtTGWmBFdhcVyx11ppyieEtjXbA25SwKHCsKjccx1MAIqafAXVdz2ECRksofSOmFYt4yy5nHFnBvD/4/oDsyvoTXHmS2jnSo2W5NLKMA88EH9GHQIDAQAB",
+  "oauth2": {
+    "client_id": "268712204740-rakculhudchjgg8sgfldeb1rq5fbt6ho.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/gmail.send"]
+  },
+  "host_permissions": [
+    "https://*.mercadolivre.com.br/*",
+    "https://*.mercadopago.com.br/*",
+    "https://*.supabase.co/*",
+    "https://gmail.googleapis.com/*",
+    "https://southamerica-east1-fefrello.cloudfunctions.net/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.mercadolivre.com.br/*",
+        "https://*.mercadopago.com.br/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

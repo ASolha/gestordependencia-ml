@@ -1,0 +1,12 @@
+{
+  "name": "ml-pendencias-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API de envio de e-mails para o Gestor de Pendências ML",
+  "dependencies": {
+    "resend": "^3.2.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
