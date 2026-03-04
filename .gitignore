@@ -23,3 +23,11 @@ publish/
 # OS / editor
 .DS_Store
 Thumbs.db
+
+# Keep only the Chrome extension in this repository
+as-sentinela-updater/
+as-sentinela-updater-bootstrap/
+vercel-api/
+chrome-extension/
+SETUP.md
+get-key.js
