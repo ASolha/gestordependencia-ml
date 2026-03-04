@@ -1,9 +1,9 @@
 /* =======================================================
-   GESTOR DE PENDÃŠNCIAS ML â€” Content Script
+   GESTOR DE PENDÊNCIAS ML — Content Script
    ======================================================= */
 
 // ============================================================
-//  CONFIGURAÃ‡ÃƒO
+//  CONFIGURAÇÃO
 // ============================================================
 const CFG = {
   supabaseUrl:  'https://dqiosohjicnruwrhxeou.supabase.co',
@@ -19,12 +19,12 @@ const FEFRELLO_API_KEY       = '708a34771f2659594502ed4b74cd634819a297d37e3fb2fa
 const FEFRELLO_CONFIG_KEY    = 'mlp_fefrello_config';
 const FEFRELLO_CACHE_KEY     = 'mlp_fefrello_cache';
 const FEFRELLO_CACHE_TTL     = 24 * 60 * 60 * 1000;
-const RESPONSAVEIS_FEFRELLO  = ['Solha', 'Ti', 'VitÃ£o', 'BrunÃ£o', 'Fe'];
+const RESPONSAVEIS_FEFRELLO  = ['Solha', 'Ti', 'Vitão', 'Brunão', 'Fe'];
 const EMAIL_SETTINGS_KEY     = 'mlp_email_settings';
 const CARD_STATUS_KEY        = 'mlp_card_status';
 const DEFAULT_EMAIL_TO       = 'brunosims@gmail.com';
 const TERMOS_IGNORAR_MODELO  = [
-  /ali[aÃ¢]n[cÃ§]a/i, /banhad[ao]/i, /folhead[ao]/i,
+  /ali[aâ]n[cç]a/i, /banhad[ao]/i, /folhead[ao]/i,
   /enchimento/i, /\bchapa\b/i, /formatura/i,
 ];
 
@@ -93,7 +93,7 @@ async function sbFetch(path, opts = {}) {
   };
   const res = await fetch(`${CFG.supabaseUrl}${path}`, { ...opts, headers });
   if (res.status === 401) {
-    try { await refreshSession(); } catch { throw new Error('SessÃ£o expirada. FaÃ§a login novamente.'); }
+    try { await refreshSession(); } catch { throw new Error('Sessão expirada. Faça login novamente.'); }
     headers.Authorization = `Bearer ${auth.token}`;
     const retry = await fetch(`${CFG.supabaseUrl}${path}`, { ...opts, headers });
     if (!retry.ok) throw new Error(`HTTP ${retry.status}`);
@@ -132,7 +132,7 @@ async function refreshSession() {
     headers: { 'Content-Type': 'application/json', 'apikey': CFG.supabaseKey },
     body: JSON.stringify({ refresh_token: auth.refreshToken }),
   });
-  if (!res.ok) throw new Error('SessÃ£o expirada');
+  if (!res.ok) throw new Error('Sessão expirada');
   const data = await res.json();
   auth.token        = data.access_token;
   auth.refreshToken = data.refresh_token;
@@ -179,7 +179,7 @@ async function deletePendencia(id) {
 }
 
 // ============================================================
-//  CAPTURA DE DADOS DA PÃGINA (MercadoLivre)
+//  CAPTURA DE DADOS DA PÁGINA (MercadoLivre)
 // ============================================================
 function capturePageData() {
   const url           = window.location.href;
@@ -190,7 +190,7 @@ function capturePageData() {
     return textoCompleto;
   };
 
-  // â”€â”€ Login (comprador) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Login (comprador) ───────────────────────────────────
   let login_cliente = '';
   const elLogin = document.querySelector('div.sc-title-subtitle-action__container p.sc-text');
   if (elLogin) {
@@ -203,7 +203,7 @@ function capturePageData() {
     login_cliente = m ? m[1].trim() : '';
   }
 
-  // â”€â”€ NÃºmero da venda â€” busca "Venda #XXXX" â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Número da venda — busca "Venda #XXXX" ───────────────
   let numero_venda = '';
   const vendaHashMatch = getTextoCompleto().match(/Venda\s*#\s*(\d+)/i);
   if (vendaHashMatch) {
@@ -220,8 +220,8 @@ function capturePageData() {
     }
   }
 
-  // â”€â”€ Modelo â€” usa apenas regex no texto (sem seletores DOM genÃ©ricos)
-  //    para nÃ£o capturar o tÃ­tulo do prÃ³prio sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Modelo — usa apenas regex no texto (sem seletores DOM genéricos)
+  //    para não capturar o título do próprio sidebar ────────────────
   let modelo = '';
   const padroesModelo = [
     /\*\*(\d+mm[^*\n]+)/,
@@ -241,7 +241,7 @@ function capturePageData() {
     }
   }
 
-  // â”€â”€ Aro â€” lÃ³gica idÃªntica ao cÃ³digo de referÃªncia â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Aro — lógica idêntica ao código de referência ───────────────
   const arosCapturados = [];
   const matchesAro = getTextoCompleto().match(/Aro\s*-\s*([^\n|]+)/g);
 
@@ -363,9 +363,9 @@ function dateGroupLabel(dateStr) {
   if (diff === 0) return 'Hoje';
   if (diff === 1) return 'Ontem';
   if (diff <= 6)  return 'Esta semana';
-  if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) return 'Este mÃªs';
+  if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) return 'Este mês';
   const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  if (d.getFullYear() === prevMonth.getFullYear() && d.getMonth() === prevMonth.getMonth()) return 'MÃªs anterior';
+  if (d.getFullYear() === prevMonth.getFullYear() && d.getMonth() === prevMonth.getMonth()) return 'Mês anterior';
   return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 }
 
@@ -391,16 +391,16 @@ function cardToHtml(p) {
         ${esc(p.login_cliente) || '(sem login)'}
       </h3>
       <table style="width:100%;border-collapse:collapse;font-size:13px;">
-        <tr><td ${td1}><b>NÂº da Venda:</b></td>
-            <td ${td2}>${esc(p.numero_venda) || 'â€”'}</td></tr>
+        <tr><td ${td1}><b>Nº da Venda:</b></td>
+            <td ${td2}>${esc(p.numero_venda) || '—'}</td></tr>
         <tr><td ${td1}><b>Modelo:</b></td>
-            <td ${td2}>${esc(p.modelo) || 'â€”'}</td></tr>
+            <td ${td2}>${esc(p.modelo) || '—'}</td></tr>
         ${parseAros(p.aro).filter(a => a.value).map(a =>
           `<tr><td ${td1}><b>${esc(a.label)}:</b></td>
                <td ${td2}>${esc(a.value)}</td></tr>`
         ).join('')}
         ${p.observacoes
-          ? `<tr><td ${td1}><b>ObservaÃ§Ãµes:</b></td>
+          ? `<tr><td ${td1}><b>Observações:</b></td>
                  <td ${td2}>${esc(p.observacoes)}</td></tr>`
           : ''}
         ${p.url
@@ -544,7 +544,7 @@ function formatCardForFefrello(p) {
   return lines.join('\n');
 }
 
-// â”€â”€ Aro helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Aro helpers ─────────────────────────────────────────────────────
 function parseAros(aroStr) {
   if (!aroStr) return [{ label: 'Avulso 1', value: '' }];
   try {
@@ -555,7 +555,7 @@ function parseAros(aroStr) {
   return [{ label: 'Aro', value: String(aroStr).trim() }];
 }
 
-// â”€â”€ Email settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Email settings ───────────────────────────────────────────────────
 function carregarEmailSettings() {
   return new Promise(r => {
     chrome.storage.local.get([EMAIL_SETTINGS_KEY], result => r(result[EMAIL_SETTINGS_KEY] || null));
@@ -565,7 +565,7 @@ function salvarEmailSettings(settings) {
   return new Promise(r => chrome.storage.local.set({ [EMAIL_SETTINGS_KEY]: settings }, r));
 }
 
-// â”€â”€ Status de cartÃµes (persiste entre abas) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Status de cartões (persiste entre abas) ───────────────────────────────
 function loadCardStatus() {
   return new Promise(r => {
     chrome.storage.local.get([CARD_STATUS_KEY], result => {
@@ -608,7 +608,7 @@ function setupStatusSync() {
 }
 
 // ============================================================
-//  AUTO-CAPTURA DE DADOS DA PÃGINA
+//  AUTO-CAPTURA DE DADOS DA PÁGINA
 // ============================================================
 function scheduleCapture(force = false, delay = 250) {
   clearTimeout(_captureTimer);
@@ -650,7 +650,7 @@ function watchUrlChanges() {
 }
 
 // ============================================================
-//  INJEÃ‡ÃƒO DO SIDEBAR
+//  INJEÇÃO DO SIDEBAR
 // ============================================================
 function injectSidebar() {
   if (document.getElementById('mlp-root')) return;
@@ -671,8 +671,8 @@ function injectSidebar() {
           <div class="mlp-login-logo">
             <div class="mlp-login-logo-box">${icon('box', 28)}</div>
           </div>
-          <h1 class="mlp-login-title">Bem-vindo ao<br>Gestor de PendÃªncias</h1>
-          <p class="mlp-login-sub">Acesse sua conta para gerenciar pendÃªncias</p>
+          <h1 class="mlp-login-title">Bem-vindo ao<br>Gestor de Pendências</h1>
+          <p class="mlp-login-sub">Acesse sua conta para gerenciar pendências</p>
 
           <div class="mlp-lf-group">
             <label class="mlp-lf-label">Email</label>
@@ -686,7 +686,7 @@ function injectSidebar() {
             <label class="mlp-lf-label">Senha</label>
             <div class="mlp-lf-input-wrap">
               <input type="password" id="mlp-password" class="mlp-lf-input has-toggle"
-                     placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password" />
+                     placeholder="••••••••" autocomplete="current-password" />
               <button type="button" class="mlp-pw-toggle" id="mlp-pw-toggle">${icon('eye', 18)}</button>
             </div>
           </div>
@@ -698,7 +698,7 @@ function injectSidebar() {
         </div>
         <footer class="mlp-login-footer">
           <div class="mlp-footer-row">${icon('database', 14)} Integrado com Supabase</div>
-          <p class="mlp-footer-copy">Â© 2024 Gestor de PendÃªncias. Todos os direitos reservados.</p>
+          <p class="mlp-footer-copy">© 2024 Gestor de Pendências. Todos os direitos reservados.</p>
         </footer>
       </div>
 
@@ -725,28 +725,28 @@ function injectSidebar() {
 
         <div class="mlp-tab-content">
 
-          <!-- PendÃªncias -->
+          <!-- Pendências -->
           <div id="mlp-tab-pendencias" class="mlp-active-tab">
             <div class="mlp-toolbar">
               <button id="mlp-criar-btn" class="mlp-btn mlp-btn-success">
-                ${icon('plus', 18)} Criar PendÃªncia
+                ${icon('plus', 18)} Criar Pendência
               </button>
             </div>
             <div id="mlp-cards-container">
-              <div class="mlp-empty">Nenhuma pendÃªncia cadastrada.</div>
+              <div class="mlp-empty">Nenhuma pendência cadastrada.</div>
             </div>
           </div>
 
-          <!-- HistÃ³rico -->
+          <!-- Histórico -->
           <div id="mlp-tab-historico">
             <div class="mlp-search-bar">
               <span class="mlp-search-icon">${icon('search', 15)}</span>
               <input type="text" id="mlp-hist-search" class="mlp-search-input"
                      placeholder="Buscar login, venda ou data..." />
-              <button id="mlp-limpar-hist" class="mlp-btn-icon-danger" title="Limpar histÃ³rico" style="flex-shrink:0">${icon('trash', 14)}</button>
+              <button id="mlp-limpar-hist" class="mlp-btn-icon-danger" title="Limpar histórico" style="flex-shrink:0">${icon('trash', 14)}</button>
             </div>
             <div id="mlp-history-list" class="mlp-history-list">
-              <div class="mlp-empty">Nenhuma pendÃªncia cadastrada.</div>
+              <div class="mlp-empty">Nenhuma pendência cadastrada.</div>
             </div>
           </div>
 
@@ -754,8 +754,8 @@ function injectSidebar() {
           <div id="mlp-tab-ajustes">
             <div class="mlp-view-content">
               <div class="mlp-settings-card">
-                <div class="mlp-settings-label">UsuÃ¡rio</div>
-                <div class="mlp-settings-value" id="mlp-ajustes-email">â€”</div>
+                <div class="mlp-settings-label">Usuário</div>
+                <div class="mlp-settings-value" id="mlp-ajustes-email">—</div>
               </div>
               <button id="mlp-logout-btn2" class="mlp-btn mlp-btn-ghost mlp-btn-logout-full">
                 ${icon('logOut', 16)} Sair da conta
@@ -764,12 +764,12 @@ function injectSidebar() {
               <div class="mlp-settings-section-title">Email de Envio</div>
               <div class="mlp-settings-card">
                 <div class="mlp-lf-group">
-                  <label class="mlp-fg-label">DestinatÃ¡rio (To)</label>
+                  <label class="mlp-fg-label">Destinatário (To)</label>
                   <input type="email" id="mlp-email-dest" class="mlp-fi"
                          placeholder="destinatario@email.com" />
                 </div>
                 <div class="mlp-lf-group">
-                  <label class="mlp-fg-label">Com cÃ³pia (CC) â€” opcional</label>
+                  <label class="mlp-fg-label">Com cópia (CC) — opcional</label>
                   <input type="email" id="mlp-email-cc" class="mlp-fi"
                          placeholder="copia@email.com" />
                 </div>
@@ -787,13 +787,13 @@ function injectSidebar() {
                   </select>
                 </div>
                 <div class="mlp-lf-group">
-                  <label class="mlp-fg-label">Coluna PadrÃ£o</label>
+                  <label class="mlp-fg-label">Coluna Padrão</label>
                   <select id="mlp-fefrello-coluna" class="mlp-select" disabled>
                     <option value="">Selecione um board</option>
                   </select>
                 </div>
                 <div class="mlp-lf-group">
-                  <label class="mlp-fg-label">ResponsÃ¡vel</label>
+                  <label class="mlp-fg-label">Responsável</label>
                   <select id="mlp-fefrello-responsavel" class="mlp-select">
                     <option value="">Nenhum</option>
                     ${RESPONSAVEIS_FEFRELLO.map(r => `<option value="${r}">${r}</option>`).join('')}
@@ -816,11 +816,11 @@ function injectSidebar() {
         <nav class="mlp-bottom-nav">
           <button class="mlp-nav-btn mlp-active" data-tab="pendencias">
             <span class="mlp-nav-icon">${icon('list', 20)}</span>
-            <span>PendÃªncias</span>
+            <span>Pendências</span>
           </button>
           <button class="mlp-nav-btn" data-tab="historico">
             <span class="mlp-nav-icon">${icon('clock', 20)}</span>
-            <span>HistÃ³rico</span>
+            <span>Histórico</span>
           </button>
           <button class="mlp-nav-btn" data-tab="ajustes">
             <span class="mlp-nav-icon">${icon('settings', 20)}</span>
@@ -831,12 +831,12 @@ function injectSidebar() {
       </div>
     </div>
 
-    <!-- CONSOLIDADO OVERLAY â€” irmÃ£o do panel, fora do transform -->
+    <!-- CONSOLIDADO OVERLAY — irmão do panel, fora do transform -->
     <div id="mlp-consolidado-overlay" class="mlp-overlay mlp-hidden">
       <div class="mlp-modal">
         <div class="mlp-modal-header">
           <div class="mlp-modal-header-info">
-            <div class="mlp-modal-title">Consolidado de PendÃªncias</div>
+            <div class="mlp-modal-title">Consolidado de Pendências</div>
             <div class="mlp-modal-count" id="mlp-modal-count"></div>
           </div>
           <button id="mlp-modal-close" class="mlp-icon-btn">${icon('x', 18)}</button>
@@ -850,12 +850,12 @@ function injectSidebar() {
       </div>
     </div>
 
-    <!-- ENVIO OVERLAY â€” irmÃ£o do panel, fora do transform -->
+    <!-- ENVIO OVERLAY — irmão do panel, fora do transform -->
     <div id="mlp-envio-overlay" class="mlp-overlay mlp-hidden">
       <div class="mlp-modal">
         <div class="mlp-modal-header">
           <div class="mlp-modal-header-info">
-            <div class="mlp-modal-title" id="mlp-envio-modal-title">Envio de PendÃªncias</div>
+            <div class="mlp-modal-title" id="mlp-envio-modal-title">Envio de Pendências</div>
             <div class="mlp-modal-count" id="mlp-envio-modal-count"></div>
           </div>
           <button id="mlp-envio-modal-close" class="mlp-icon-btn">${icon('x', 18)}</button>
@@ -935,7 +935,7 @@ function bindLoginEvents() {
     const e = email?.value?.trim();
     const p = pass?.value;
     if (!e || !p) { if (err) err.textContent = 'Preencha e-mail e senha.'; return; }
-    btn.disabled = true; btn.textContent = 'Entrandoâ€¦'; if (err) err.textContent = '';
+    btn.disabled = true; btn.textContent = 'Entrando…'; if (err) err.textContent = '';
     try {
       const session = await signIn(e, p);
       auth.token        = session.access_token;
@@ -959,7 +959,7 @@ function bindLoginEvents() {
 //  MAIN
 // ============================================================
 // Garante que o layout vertical do painel esteja correto.
-// Usa window.innerHeight â€” contorna qualquer problema com 100vh no host.
+// Usa window.innerHeight — contorna qualquer problema com 100vh no host.
 function fixLayout() {
   const h = Math.round(window.visualViewport?.height || document.documentElement.clientHeight || window.innerHeight || 0);
 
@@ -974,7 +974,7 @@ function fixLayout() {
   if (!mv?.classList.contains('mlp-visible')) return;
   mv.style.setProperty('height', h + 'px', 'important');
 
-  // 3. Tab content â€” mede alturas reais para evitar "rodapÃ© engolido"
+  // 3. Tab content — mede alturas reais para evitar "rodapé engolido"
   const tc = mv.querySelector('.mlp-tab-content');
   const header = mv.querySelector('.mlp-header');
   const nav = mv.querySelector('.mlp-bottom-nav');
@@ -988,7 +988,7 @@ function fixLayout() {
   }
 }
 
-// Corrige dimensÃµes de um overlay para cobrir 100% da tela via JS
+// Corrige dimensões de um overlay para cobrir 100% da tela via JS
 function fixOverlay(overlayEl) {
   if (!overlayEl) return;
   overlayEl.style.setProperty('width',  window.innerWidth  + 'px', 'important');
@@ -1034,7 +1034,7 @@ function bindMainEvents() {
   if (logoutBtn)             logoutBtn.onclick             = onLogout;
   if (logoutBtn2)            logoutBtn2.onclick            = onLogout;
 
-  // Modal consolidado â€” fechar
+  // Modal consolidado — fechar
   const consolidadoOverlay = document.getElementById('mlp-consolidado-overlay');
   const modalClose         = document.getElementById('mlp-modal-close');
   if (modalClose)        modalClose.onclick = () => consolidadoOverlay?.classList.add('mlp-hidden');
@@ -1044,7 +1044,7 @@ function bindMainEvents() {
     });
   }
 
-  // Modal envio â€” fechar
+  // Modal envio — fechar
   const envioOverlay = document.getElementById('mlp-envio-overlay');
   const envioClose   = document.getElementById('mlp-envio-modal-close');
   if (envioClose) envioClose.onclick = () => envioOverlay?.classList.add('mlp-hidden');
@@ -1066,7 +1066,7 @@ function bindMainEvents() {
   const histSearch = document.getElementById('mlp-hist-search');
   if (histSearch) histSearch.oninput = () => renderHistory(histSearch.value);
 
-  // Limpar histÃ³rico
+  // Limpar histórico
   const limparHistBtn = document.getElementById('mlp-limpar-hist');
   if (limparHistBtn) limparHistBtn.onclick = onLimparHistoricoArquivados;
 
@@ -1076,7 +1076,7 @@ function bindMainEvents() {
     emailSalvar.onclick = async () => {
       const emailTo = document.getElementById('mlp-email-dest')?.value?.trim();
       const emailCC = document.getElementById('mlp-email-cc')?.value?.trim() || '';
-      if (!emailTo) { toast('Informe o email destinatÃ¡rio', 'warning'); return; }
+      if (!emailTo) { toast('Informe o email destinatário', 'warning'); return; }
       await salvarEmailSettings({ emailTo, emailCC });
       toast('Email de envio salvo!');
     };
@@ -1093,14 +1093,14 @@ function bindMainEvents() {
       const responsible = document.getElementById('mlp-fefrello-responsavel')?.value || '';
       if (!boardId || !columnId) { toast('Selecione board e coluna', 'warning'); return; }
       await salvarConfigFefrello({ boardId, columnId, responsible });
-      toast('ConfiguraÃ§Ãµes Fefrello salvas!');
+      toast('Configurações Fefrello salvas!');
     };
   }
 
   if (fefrelloRefresh) {
     fefrelloRefresh.onclick = async () => {
       fefrelloRefresh.disabled = true;
-      fefrelloRefresh.textContent = 'Atualizandoâ€¦';
+      fefrelloRefresh.textContent = 'Atualizando…';
       try {
         await forcarAtualizacaoCache();
         await loadFefrelloSettings();
@@ -1205,7 +1205,7 @@ async function loadEmailSettings() {
 }
 
 // ============================================================
-//  RENDER â€” CARDS (PendÃªncias)
+//  RENDER — CARDS (Pendências)
 // ============================================================
 function renderCards() {
   const container = document.getElementById('mlp-cards-container');
@@ -1213,7 +1213,7 @@ function renderCards() {
   const ativos    = pendencias.filter(p => !archivedIds.has(String(p.id)));
   if (!container) return;
   if (ativos.length === 0) {
-    container.innerHTML = '<div class="mlp-empty">Nenhuma pendÃªncia cadastrada.</div>';
+    container.innerHTML = '<div class="mlp-empty">Nenhuma pendência cadastrada.</div>';
     if (countEl) countEl.textContent = '';
     return;
   }
@@ -1227,7 +1227,7 @@ function renderCards() {
   bindCardEvents();
 }
 
-// Field order: Login, Venda | URL | Modelo | Aro | ObservaÃ§Ãµes
+// Field order: Login, Venda | URL | Modelo | Aro | Observações
 function cardHtml(p, isNew) {
   const id  = p.id || 'new';
   const obs = p.observacoes || '';
@@ -1240,16 +1240,16 @@ function cardHtml(p, isNew) {
       <div class="mlp-card-header">
         <div class="mlp-card-header-left">
           <div class="mlp-card-avatar empty">${icon('user', 14)}</div>
-          <span class="mlp-card-name">Nova PendÃªncia</span>
+          <span class="mlp-card-name">Nova Pendência</span>
         </div>
       </div>
       <div class="mlp-card-grid">
         ${fg2('login_cliente', 'Login',   p.login_cliente, 'Apelido do comprador')}
-        ${fg1('numero_venda',  'Venda #', p.numero_venda,  'NÃºmero da venda')}
+        ${fg1('numero_venda',  'Venda #', p.numero_venda,  'Número da venda')}
         ${fg2('url',           'URL',     p.url,           'https://...')}
         ${fg2('modelo',        'Modelo',  p.modelo,        'Descreva o modelo')}
         ${arosNew.map(a => fg_aro(a.label, a.value)).join('')}
-        ${fgta('observacoes',  'ObservaÃ§Ãµes', p.observacoes, 'Detalhes adicionais...')}
+        ${fgta('observacoes',  'Observações', p.observacoes, 'Detalhes adicionais...')}
       </div>
       <div class="mlp-card-footer">
         <button class="mlp-btn mlp-btn-ghost mlp-btn-cancel-new">
@@ -1262,8 +1262,8 @@ function cardHtml(p, isNew) {
     </div>`;
   }
 
-  const name       = p.login_cliente || 'PendÃªncia';
-  const obsPreview = obs.slice(0, 72) + (obs.length > 72 ? 'â€¦' : '');
+  const name       = p.login_cliente || 'Pendência';
+  const obsPreview = obs.slice(0, 72) + (obs.length > 72 ? '…' : '');
   const aros       = parseAros(p.aro);
   const fefSent    = fefrelloSentIds.has(String(id));
   const emailSent  = emailSentIds.has(String(id));
@@ -1305,11 +1305,11 @@ function cardHtml(p, isNew) {
     <div class="mlp-card-body">
       <div class="mlp-card-grid">
         ${fg2('login_cliente', 'Login',   p.login_cliente, 'Apelido do comprador')}
-        ${fg1('numero_venda',  'Venda #', p.numero_venda,  'NÃºmero da venda')}
+        ${fg1('numero_venda',  'Venda #', p.numero_venda,  'Número da venda')}
         ${fg2('url',           'URL',     p.url,           'https://...')}
         ${fg2('modelo',        'Modelo',  p.modelo,        'Descreva o modelo')}
         ${aros.map(a => fg_aro(a.label, a.value)).join('')}
-        ${fgta('observacoes',  'ObservaÃ§Ãµes', p.observacoes, 'Detalhes adicionais...')}
+        ${fgta('observacoes',  'Observações', p.observacoes, 'Detalhes adicionais...')}
       </div>
       <div class="mlp-card-footer">
         <button class="mlp-btn mlp-btn-primary mlp-btn-save-existing" data-id="${id}">
@@ -1353,7 +1353,7 @@ function bindCardEvents() {
   const c = document.getElementById('mlp-cards-container');
   if (!c) return;
 
-  // Expand/collapse â€” click na seta OU em qualquer Ã¡rea do summary (exceto botÃµes de aÃ§Ã£o)
+  // Expand/collapse — click na seta OU em qualquer área do summary (exceto botões de ação)
   c.querySelectorAll('.mlp-card-summary').forEach(summary => {
     summary.onclick = (e) => {
       if (e.target.closest('.mlp-btn, .mlp-btn-icon-send, .mlp-btn-icon-danger, .mlp-btn-icon-archive')) return;
@@ -1369,13 +1369,13 @@ function bindCardEvents() {
   // Excluir
   c.querySelectorAll('.mlp-btn-del').forEach(b => {
     b.onclick = async () => {
-      if (!confirm('Excluir esta pendÃªncia?')) return;
+      if (!confirm('Excluir esta pendência?')) return;
       try {
         await deletePendencia(b.dataset.id);
         pendencias = pendencias.filter(p => String(p.id) !== String(b.dataset.id));
         if (expandedCardId === String(b.dataset.id)) expandedCardId = null;
         renderCards();
-        toast('PendÃªncia excluÃ­da.');
+        toast('Pendência excluída.');
       } catch (e) { toast(e.message, 'error'); }
     };
   });
@@ -1385,7 +1385,7 @@ function bindCardEvents() {
     b.onclick = () => { b.closest('.mlp-card')?.remove(); if (!pendencias.length) renderCards(); };
   });
 
-  // Salvar novo â€” substitui o cartÃ£o in-place e anima abertura
+  // Salvar novo — substitui o cartão in-place e anima abertura
   c.querySelectorAll('.mlp-btn-save-new').forEach(b => {
     b.onclick = async () => {
       const card   = b.closest('.mlp-card');
@@ -1394,24 +1394,24 @@ function bindCardEvents() {
         highlightDuplicateCard(fields.numero_venda);
         card?.remove();
         if (!pendencias.length) renderCards();
-        toast('JÃ¡ existe pendÃªncia para esta venda.', 'warning');
+        toast('Já existe pendência para esta venda.', 'warning');
         return;
       }
-      b.disabled = true; b.innerHTML = `${icon('check', 13)} Salvandoâ€¦`;
+      b.disabled = true; b.innerHTML = `${icon('check', 13)} Salvando…`;
       try {
         const saved = await createPendencia(fields);
         pendencias.unshift(saved);
         expandedCardId = String(saved.id);
 
-        // ConstrÃ³i o HTML do cartÃ£o salvo e injeta no lugar
+        // Constrói o HTML do cartão salvo e injeta no lugar
         const tmp = document.createElement('div');
         tmp.innerHTML = cardHtml(saved, false).trim();
         const newCard = tmp.firstElementChild;
 
         card.replaceWith(newCard);
 
-        // Dois frames: primeiro o browser pinta o cartÃ£o colapsado,
-        // depois adiciona mlp-expanded â€” a transiÃ§Ã£o CSS dispara
+        // Dois frames: primeiro o browser pinta o cartão colapsado,
+        // depois adiciona mlp-expanded — a transição CSS dispara
         requestAnimationFrame(() => requestAnimationFrame(() => {
           newCard.classList.add('mlp-expanded');
           const toggle = newCard.querySelector('.mlp-card-toggle');
@@ -1425,7 +1425,7 @@ function bindCardEvents() {
         const countEl = document.getElementById('mlp-count');
         if (countEl) countEl.textContent = pendencias.length;
 
-        toast('PendÃªncia salva!');
+        toast('Pendência salva!');
       } catch (e) {
         toast(e.message, 'error');
         b.disabled = false; b.innerHTML = `${icon('check', 13)} Salvar`;
@@ -1439,7 +1439,7 @@ function bindCardEvents() {
       const id     = b.dataset.id;
       const card   = b.closest('.mlp-card');
       const fields = collectFields(card);
-      b.disabled = true; b.textContent = 'Salvandoâ€¦';
+      b.disabled = true; b.textContent = 'Salvando…';
       try {
         await updatePendencia(id, fields);
         const idx = pendencias.findIndex(p => String(p.id) === String(id));
@@ -1468,7 +1468,7 @@ function bindCardEvents() {
       await saveCardStatus();
       renderCards();
       renderHistory(document.getElementById('mlp-hist-search')?.value || '');
-      toast('PendÃªncia arquivada no histÃ³rico.');
+      toast('Pendência arquivada no histórico.');
     };
   });
 
@@ -1494,7 +1494,7 @@ function bindSavedCardEvents(container, rerender) {
   container.querySelectorAll('.mlp-btn-del').forEach(btn => {
     btn.onclick = async (e) => {
       e.stopPropagation();
-      if (!confirm('Excluir esta pendÃƒÂªncia?')) return;
+      if (!confirm('Excluir esta pendência?')) return;
       try {
         await deletePendencia(btn.dataset.id);
         archivedIds.delete(String(btn.dataset.id));
@@ -1503,7 +1503,7 @@ function bindSavedCardEvents(container, rerender) {
         rerender();
         const countEl = document.getElementById('mlp-count');
         if (countEl) countEl.textContent = pendencias.filter(p => !archivedIds.has(String(p.id))).length || '';
-        toast('PendÃƒÂªncia excluÃƒÂ­da.');
+        toast('Pendência excluída.');
       } catch (ex) { toast(ex.message, 'error'); }
     };
   });
@@ -1513,7 +1513,7 @@ function bindSavedCardEvents(container, rerender) {
       const id     = btn.dataset.id;
       const card   = btn.closest('.mlp-card');
       const fields = collectFields(card);
-      btn.disabled = true; btn.textContent = 'SalvandoÃ¢â‚¬Â¦';
+      btn.disabled = true; btn.textContent = 'Salvando…';
       try {
         await updatePendencia(id, fields);
         const idx = pendencias.findIndex(p => String(p.id) === String(id));
@@ -1540,12 +1540,12 @@ function bindSavedCardEvents(container, rerender) {
         archivedIds.delete(id);
         expandedCardId = id;
         await saveCardStatus();
-        toast('PendÃªncia retornou para a tela principal.');
+        toast('Pendência retornou para a tela principal.');
       } else {
         archivedIds.add(id);
         if (expandedCardId === id) expandedCardId = null;
         await saveCardStatus();
-        toast('PendÃªncia arquivada no histÃ³rico.');
+        toast('Pendência arquivada no histórico.');
       }
       rerender();
     };
@@ -1557,7 +1557,7 @@ function bindSavedCardEvents(container, rerender) {
 }
 
 // ============================================================
-//  RENDER â€” HISTÃ“RICO
+//  RENDER — HISTÓRICO
 // ============================================================
 function renderHistory(filter = '') {
   const container = document.getElementById('mlp-history-list');
@@ -1575,7 +1575,7 @@ function renderHistory(filter = '') {
     : historico;
 
   if (list.length === 0) {
-    container.innerHTML = `<div class="mlp-empty">${q ? 'Nenhum resultado.' : 'Nenhuma pendÃªncia cadastrada.'}</div>`;
+    container.innerHTML = `<div class="mlp-empty">${q ? 'Nenhum resultado.' : 'Nenhuma pendência cadastrada.'}</div>`;
     return;
   }
 
@@ -1587,9 +1587,9 @@ function historyItemHtml(p) {
   return cardHtml(p, false);
   const date    = p.created_at
     ? new Date(p.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
-    : 'â€”';
+    : '—';
   const obs     = p.observacoes || '';
-  const urlShort = (p.url || '').slice(0, 55) + ((p.url || '').length > 55 ? 'â€¦' : '');
+  const urlShort = (p.url || '').slice(0, 55) + ((p.url || '').length > 55 ? '…' : '');
 
   return `
   <div class="mlp-hist-item" data-id="${p.id}">
@@ -1598,7 +1598,7 @@ function historyItemHtml(p) {
         <span class="mlp-hist-avatar">${icon('user', 14)}</span>
         <div class="mlp-hist-info">
           <span class="mlp-hist-login">${esc(p.login_cliente) || '(sem login)'}</span>
-          ${obs ? `<span class="mlp-hist-obs">${esc(obs.slice(0, 50))}${obs.length > 50 ? 'â€¦' : ''}</span>` : ''}
+          ${obs ? `<span class="mlp-hist-obs">${esc(obs.slice(0, 50))}${obs.length > 50 ? '…' : ''}</span>` : ''}
         </div>
       </div>
       <div class="mlp-hist-summary-right">
@@ -1647,13 +1647,13 @@ function bindHistoryEvents() {
   container.querySelectorAll('.mlp-hist-del-btn').forEach(btn => {
     btn.onclick = async (e) => {
       e.stopPropagation();
-      if (!confirm('Excluir esta pendÃªncia?')) return;
+      if (!confirm('Excluir esta pendência?')) return;
       try {
         await deletePendencia(btn.dataset.id);
         pendencias = pendencias.filter(p => String(p.id) !== String(btn.dataset.id));
         const search = document.getElementById('mlp-hist-search');
         renderHistory(search?.value || '');
-        toast('PendÃªncia excluÃ­da.');
+        toast('Pendência excluída.');
       } catch (ex) { toast(ex.message, 'error'); }
     };
   });
@@ -1716,7 +1716,7 @@ function highlightDuplicateCard(numeroVenda, excludeId = null) {
 }
 
 // ============================================================
-//  AÃ‡Ã•ES
+//  AÇÕES
 // ============================================================
 function onCriar() {
   const container = document.getElementById('mlp-cards-container');
@@ -1739,15 +1739,15 @@ function onCriar() {
         highlightDuplicateCard(fields.numero_venda);
         cardEl.remove();
         if (!pendencias.length) renderCards();
-        toast('JÃ¡ existe pendÃªncia para esta venda.', 'warning');
+        toast('Já existe pendência para esta venda.', 'warning');
         return;
       }
-      saveBtn.disabled = true; saveBtn.textContent = 'Salvandoâ€¦';
+      saveBtn.disabled = true; saveBtn.textContent = 'Salvando…';
       try {
         const saved = await createPendencia(fields);
         pendencias.unshift(saved);
         renderCards();
-        toast('PendÃªncia salva!');
+        toast('Pendência salva!');
       } catch (e) {
         toast(e.message, 'error');
         saveBtn.disabled = false; saveBtn.innerHTML = `${icon('check', 13)} Salvar`;
@@ -1778,7 +1778,7 @@ function onCriarExpandido() {
         highlightDuplicateCard(fields.numero_venda);
         cardEl.remove();
         if (!pendencias.length) renderCards();
-        toast('JÃ¡ existe pendÃªncia para esta venda.', 'warning');
+        toast('Já existe pendência para esta venda.', 'warning');
         return;
       }
       saveBtn.disabled = true;
@@ -1814,18 +1814,18 @@ function onCriarExpandido() {
 }
 
 async function onEnviarRemessa() {
-  if (pendencias.length === 0) { toast('Nenhuma pendÃªncia para enviar.', 'warning'); return; }
+  if (pendencias.length === 0) { toast('Nenhuma pendência para enviar.', 'warning'); return; }
   const btn = document.getElementById('mlp-remessa-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Enviandoâ€¦'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
   try {
     const date    = formatDate();
     const subject = `Pendentes - ${date}`;
     const body    = `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">
         <h2 style="color:#222;border-bottom:3px solid #FFE600;padding-bottom:8px;">
-          PendÃªncias em Aberto â€” ${date}
+          Pendências em Aberto — ${date}
         </h2>
-        <p style="color:#666;margin-bottom:16px;">Total: <strong>${pendencias.length}</strong> pendÃªncia(s)</p>
+        <p style="color:#666;margin-bottom:16px;">Total: <strong>${pendencias.length}</strong> pendência(s)</p>
         ${pendencias.map((p, i) =>
           `${i > 0 ? '<hr style="border:none;border-top:1px solid #eee;margin:12px 0;" />' : ''}${cardToHtml(p)}`
         ).join('')}
@@ -1834,7 +1834,7 @@ async function onEnviarRemessa() {
     pendencias.forEach(p => emailSentIds.add(String(p.id)));
     await saveCardStatus();
     renderCards();
-    toast(`Remessa enviada â€” ${pendencias.length} pendÃªncia(s)!`);
+    toast(`Remessa enviada — ${pendencias.length} pendência(s)!`);
   } catch (e) {
     toast(e.message, 'error');
   } finally {
@@ -1852,7 +1852,7 @@ async function onEnviarIndividual(id, btn) {
     const body    = `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">
         <h2 style="color:#222;border-bottom:3px solid #FFE600;padding-bottom:8px;">
-          PendÃªncia â€” ${esc(p.login_cliente) || 'Cliente'}
+          Pendência — ${esc(p.login_cliente) || 'Cliente'}
         </h2>
         <p style="color:#666;margin-bottom:16px;">Data: <strong>${date}</strong></p>
         ${cardToHtml(p)}
@@ -1878,15 +1878,15 @@ async function onCriarFefrello(id, btn) {
     return;
   }
   const originalHTML = btn?.innerHTML;
-  if (btn) { btn.disabled = true; btn.textContent = 'Criandoâ€¦'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Criando…'; }
   try {
-    const title       = p.login_cliente || p.numero_venda || 'Sem tÃ­tulo';
+    const title       = p.login_cliente || p.numero_venda || 'Sem título';
     const description = formatCardForFefrello(p);
     await criarCardFefrello(config.boardId, config.columnId, title, description, config.responsible || '');
     fefrelloSentIds.add(String(id));
     await saveCardStatus();
     toast('Card Fefrello criado!');
-    // MantÃ©m botÃ£o desabilitado e cinza (enviado)
+    // Mantém botão desabilitado e cinza (enviado)
     if (btn) {
       btn.disabled = true;
       btn.innerHTML = `${icon('check', 13)} Enviado`;
@@ -1899,14 +1899,14 @@ async function onCriarFefrello(id, btn) {
 }
 
 // ============================================================
-//  ENVIO COM CONFIRMAÃ‡ÃƒO (Consolidado do dia / Individual do dia)
+//  ENVIO COM CONFIRMAÇÃO (Consolidado do dia / Individual do dia)
 // ============================================================
 async function onEnvioConsolidado() {
   await loadPendencias();
   renderCards();
   renderHistory(document.getElementById('mlp-hist-search')?.value || '');
   const hoje = pendencias.filter(p => dateGroupLabel(p.created_at) === 'Hoje');
-  if (hoje.length === 0) { toast('Nenhuma pendÃªncia de hoje para enviar.', 'warning'); return; }
+  if (hoje.length === 0) { toast('Nenhuma pendência de hoje para enviar.', 'warning'); return; }
   abrirEnvioModal('consolidado', new Set(hoje.map(p => String(p.id))));
 }
 
@@ -1915,7 +1915,7 @@ async function onEnvioIndividualAll() {
   renderCards();
   renderHistory(document.getElementById('mlp-hist-search')?.value || '');
   const hoje = pendencias.filter(p => dateGroupLabel(p.created_at) === 'Hoje');
-  if (hoje.length === 0) { toast('Nenhuma pendÃªncia de hoje para enviar.', 'warning'); return; }
+  if (hoje.length === 0) { toast('Nenhuma pendência de hoje para enviar.', 'warning'); return; }
   abrirEnvioModal('individual', new Set(hoje.map(p => String(p.id))));
 }
 
@@ -1924,7 +1924,7 @@ function abrirEnvioModal(mode, selectedIds) {
   const titleEl = document.getElementById('mlp-envio-modal-title');
   if (!overlay) return;
   if (titleEl) titleEl.textContent =
-    mode === 'consolidado' ? 'Envio Consolidado â€” Hoje' : 'Envio Individual â€” Hoje';
+    mode === 'consolidado' ? 'Envio Consolidado — Hoje' : 'Envio Individual — Hoje';
   renderEnvioModal(mode, selectedIds);
   fixOverlay(overlay);
   overlay.classList.remove('mlp-hidden');
@@ -2003,16 +2003,16 @@ async function confirmarEnvio(mode, selectedIds) {
 
 async function _enviarConsolidado(selected) {
   const btn = document.getElementById('mlp-remessa-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Enviandoâ€¦'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
   try {
     const date    = formatDate();
     const subject = `Pendentes - ${date}`;
     const body    = `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">
         <h2 style="color:#222;border-bottom:3px solid #FFE600;padding-bottom:8px;">
-          PendÃªncias em Aberto â€” ${date}
+          Pendências em Aberto — ${date}
         </h2>
-        <p style="color:#666;margin-bottom:16px;">Total: <strong>${selected.length}</strong> pendÃªncia(s)</p>
+        <p style="color:#666;margin-bottom:16px;">Total: <strong>${selected.length}</strong> pendência(s)</p>
         ${selected.map((p, i) =>
           `${i > 0 ? '<hr style="border:none;border-top:1px solid #eee;margin:12px 0;" />' : ''}${cardToHtml(p)}`
         ).join('')}
@@ -2021,7 +2021,7 @@ async function _enviarConsolidado(selected) {
     selected.forEach(p => emailSentIds.add(String(p.id)));
     await saveCardStatus();
     renderCards();
-    toast(`Consolidado enviado â€” ${selected.length} pendÃªncia(s)!`);
+    toast(`Consolidado enviado — ${selected.length} pendência(s)!`);
   } catch (e) {
     toast(e.message, 'error');
   } finally {
@@ -2031,7 +2031,7 @@ async function _enviarConsolidado(selected) {
 
 async function _enviarIndividualAll(selected) {
   const btn = document.getElementById('mlp-envio-individual-all-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Enviandoâ€¦'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
   let success = 0;
   const errors = [];
   for (const p of selected) {
@@ -2041,7 +2041,7 @@ async function _enviarIndividualAll(selected) {
       const body    = `
         <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">
           <h2 style="color:#222;border-bottom:3px solid #FFE600;padding-bottom:8px;">
-            PendÃªncia â€” ${esc(p.login_cliente) || 'Cliente'}
+            Pendência — ${esc(p.login_cliente) || 'Cliente'}
           </h2>
           <p style="color:#666;margin-bottom:16px;">Data: <strong>${date}</strong></p>
           ${cardToHtml(p)}
@@ -2070,7 +2070,7 @@ async function onVerConsolidado() {
   await loadPendencias();
   renderCards();
   renderHistory(document.getElementById('mlp-hist-search')?.value || '');
-  if (pendencias.length === 0) { toast('Nenhuma pendÃªncia para consolidar.', 'info'); return; }
+  if (pendencias.length === 0) { toast('Nenhuma pendência para consolidar.', 'info'); return; }
   const overlay = document.getElementById('mlp-consolidado-overlay');
   if (!overlay) return;
   const selectedIds = new Set(pendencias.map(p => String(p.id)));
@@ -2105,7 +2105,7 @@ function renderConsolidadoModal(selectedIds, localEdits) {
           </div>
           ${p.modelo ? `<div class="mlp-modal-detail">Modelo: ${esc(p.modelo)}</div>` : ''}
           ${aros.filter(a => a.value).map(a => `<div class="mlp-modal-detail">${esc(a.label)}: ${esc(a.value)}</div>`).join('')}
-          ${p.observacoes ? `<div class="mlp-modal-detail">${esc(p.observacoes.slice(0, 80) + (p.observacoes.length > 80 ? 'â€¦' : ''))}</div>` : ''}
+          ${p.observacoes ? `<div class="mlp-modal-detail">${esc(p.observacoes.slice(0, 80) + (p.observacoes.length > 80 ? '…' : ''))}</div>` : ''}
         </div>
         <button class="mlp-modal-edit-btn" title="Editar">${icon('edit', 13)}</button>
         <button class="mlp-modal-del-btn" data-id="${id}" title="Excluir">${icon('trash', 13)}</button>
@@ -2116,7 +2116,7 @@ function renderConsolidadoModal(selectedIds, localEdits) {
           <input class="mlp-edit-input" data-field="login_cliente" data-id="${id}" value="${esc(p.login_cliente || '')}">
         </div>
         <div class="mlp-edit-field">
-          <label class="mlp-edit-label">NÂº Venda</label>
+          <label class="mlp-edit-label">Nº Venda</label>
           <input class="mlp-edit-input" data-field="numero_venda" data-id="${id}" value="${esc(p.numero_venda || '')}">
         </div>
         <div class="mlp-edit-field">
@@ -2129,7 +2129,7 @@ function renderConsolidadoModal(selectedIds, localEdits) {
           <input class="mlp-edit-input" data-field="aro" data-aro-index="${ai}" data-aro-label="${esc(a.label)}" data-id="${id}" value="${esc(a.value || '')}">
         </div>`).join('')}
         <div class="mlp-edit-field">
-          <label class="mlp-edit-label">ObservaÃ§Ãµes</label>
+          <label class="mlp-edit-label">Observações</label>
           <textarea class="mlp-edit-textarea" data-field="observacoes" data-id="${id}">${esc(p.observacoes || '')}</textarea>
         </div>
         <div class="mlp-edit-field">
@@ -2142,7 +2142,7 @@ function renderConsolidadoModal(selectedIds, localEdits) {
 
   updateCount();
 
-  // Selection toggle â€” click on header area (not edit/delete buttons)
+  // Selection toggle — click on header area (not edit/delete buttons)
   list.querySelectorAll('.mlp-modal-item-header').forEach(header => {
     header.addEventListener('click', e => {
       if (e.target.closest('.mlp-modal-edit-btn, .mlp-modal-del-btn')) return;
@@ -2165,7 +2165,7 @@ function renderConsolidadoModal(selectedIds, localEdits) {
   list.querySelectorAll('.mlp-modal-del-btn').forEach(btn => {
     btn.addEventListener('click', async e => {
       e.stopPropagation();
-      if (!confirm('Excluir esta pendÃªncia?')) return;
+      if (!confirm('Excluir esta pendência?')) return;
       const id = btn.dataset.id;
       try {
         await deletePendencia(id);
@@ -2174,7 +2174,7 @@ function renderConsolidadoModal(selectedIds, localEdits) {
         btn.closest('.mlp-modal-item')?.remove();
         updateCount();
         renderCards();
-        toast('PendÃªncia excluÃ­da.');
+        toast('Pendência excluída.');
       } catch (ex) { toast(ex.message, 'error'); }
     });
   });
@@ -2222,9 +2222,9 @@ function onCopiarConsolidado(selectedIds, localEdits) {
 
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">
     <h2 style="color:#222;border-bottom:3px solid #FFE600;padding-bottom:8px;">
-      Consolidado de PendÃªncias â€” ${date}
+      Consolidado de Pendências — ${date}
     </h2>
-    <p style="color:#666;margin-bottom:16px;">Total: <strong>${merged.length}</strong> pendÃªncia(s)</p>
+    <p style="color:#666;margin-bottom:16px;">Total: <strong>${merged.length}</strong> pendência(s)</p>
     ${merged.map((p, i) =>
       `${i > 0 ? '<hr style="border:none;border-top:1px solid #eee;margin:12px 0;" />' : ''}${cardToHtml(p)}`
     ).join('')}
@@ -2235,7 +2235,7 @@ function onCopiarConsolidado(selectedIds, localEdits) {
     saveCardStatus();
     document.getElementById('mlp-consolidado-overlay')?.classList.add('mlp-hidden');
     renderCards();
-    toast(`${merged.length} pendÃªncia(s) copiadas!`);
+    toast(`${merged.length} pendência(s) copiadas!`);
   };
 
   (async () => {
@@ -2246,7 +2246,7 @@ function onCopiarConsolidado(selectedIds, localEdits) {
       afterCopy();
     } catch {
       // Fallback: plain text
-      const plain = `CONSOLIDADO DE PENDÃŠNCIAS â€” ${date}\nTotal: ${merged.length} pendÃªncia(s)\n\n` +
+      const plain = `CONSOLIDADO DE PENDÊNCIAS — ${date}\nTotal: ${merged.length} pendência(s)\n\n` +
         merged.map((p, i) => [
           `${i + 1}. ${p.login_cliente || '(sem login)'}${p.numero_venda ? ` | #${p.numero_venda}` : ''}`,
           p.modelo      ? `   Modelo: ${p.modelo}` : null,
@@ -2267,8 +2267,8 @@ function onCopiarConsolidado(selectedIds, localEdits) {
 }
 
 async function onLimparHistorico() {
-  if (pendencias.length === 0) { toast('HistÃ³rico jÃ¡ estÃ¡ vazio.', 'info'); return; }
-  if (!confirm(`Excluir ${pendencias.length} pendÃªncia(s) do histÃ³rico? Esta aÃ§Ã£o nÃ£o pode ser desfeita.`)) return;
+  if (pendencias.length === 0) { toast('Histórico já está vazio.', 'info'); return; }
+  if (!confirm(`Excluir ${pendencias.length} pendência(s) do histórico? Esta ação não pode ser desfeita.`)) return;
   const btn = document.getElementById('mlp-limpar-hist');
   if (btn) btn.disabled = true;
   try {
@@ -2280,9 +2280,9 @@ async function onLimparHistorico() {
     await saveCardStatus();
     renderHistory();
     renderCards();
-    toast('HistÃ³rico limpo com sucesso!');
+    toast('Histórico limpo com sucesso!');
   } catch (e) {
-    toast(e.message || 'Erro ao limpar histÃ³rico.', 'error');
+    toast(e.message || 'Erro ao limpar histórico.', 'error');
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -2290,8 +2290,8 @@ async function onLimparHistorico() {
 
 async function onLimparHistoricoArquivados() {
   const historico = pendencias.filter(p => archivedIds.has(String(p.id)));
-  if (historico.length === 0) { toast('HistÃ³rico jÃ¡ estÃ¡ vazio.', 'info'); return; }
-  if (!confirm(`Excluir ${historico.length} pendÃªncia(s) do histÃ³rico? Esta aÃ§Ã£o nÃ£o pode ser desfeita.`)) return;
+  if (historico.length === 0) { toast('Histórico já está vazio.', 'info'); return; }
+  if (!confirm(`Excluir ${historico.length} pendência(s) do histórico? Esta ação não pode ser desfeita.`)) return;
   const btn = document.getElementById('mlp-limpar-hist');
   if (btn) btn.disabled = true;
   try {
@@ -2307,9 +2307,9 @@ async function onLimparHistoricoArquivados() {
     await saveCardStatus();
     renderHistory();
     renderCards();
-    toast('HistÃ³rico limpo com sucesso!');
+    toast('Histórico limpo com sucesso!');
   } catch (e) {
-    toast(e.message || 'Erro ao limpar histÃ³rico.', 'error');
+    toast(e.message || 'Erro ao limpar histórico.', 'error');
   } finally {
     if (btn) btn.disabled = false;
   }
